@@ -999,6 +999,8 @@
       registerLabel('🌉 3D Dummy Sarvatra Bridge (Multi-Span)', () => {
         return bridgeGroup.position.clone().add(new THREE.Vector3(0, 6.2, 2));
       }, 'lbl-bridge', true);
+      registerLabel('📏 LENGTH: 8.0 FT (2,438 mm)', () => new THREE.Vector3(0, 4.5, BOARD_D / 2 + 4), 'lbl-town', true);
+      registerLabel('📏 BREADTH: 7.0 FT (2,134 mm)', () => new THREE.Vector3(BOARD_W / 2 + 5, 4.5, 10), 'lbl-town', true);
     }
 
     function updateHtmlLabels() {
@@ -1023,7 +1025,7 @@
     async function init() {
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 1, 2200);
-      camera.position.set(0, 185, 225);
+      camera.position.set(0, 198, 248);
 
       renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
