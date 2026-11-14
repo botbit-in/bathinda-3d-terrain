@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bathinda Sector (64 Unit) — 3D Tactical Sand Model, Exact Water Bodies, Distributaries & Dummy Sarvatra Bridge | autoAbode</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+    body, html {
+      width: 100%; height: 100%; overflow: hidden;
+      background: radial-gradient(circle at 50% 35%, #0f172a 0%, #090f1d 70%, #020617 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #f8fafc;
+    }
+    #canvas-container { width: 100vw; height: 100vh; position: relative; }
+
+    /* Top Header */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+      padding: 10px 16px;
+      background: rgba(9, 15, 29, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.28);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .brand-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(14, 165, 233, 0.16); border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #38bdf8; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .title { font-size: 14px; font-weight: 800; color: #f8fafc; letter-spacing: 0.2px; margin-top: 2px; }
+    .sub { font-size: 11px; color: #94a3b8; }
+    .header-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    /* Side Info / Client Expectations Drawer */
+    .side-panel {
+      position: fixed; top: 72px; left: 12px; z-index: 25;
+      width: 315px; max-height: calc(100vh - 165px); overflow-y: auto;
+      background: rgba(15, 23, 42, 0.90);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 14px; padding: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    .side-panel.collapsed { transform: translateX(-340px); opacity: 0; pointer-events: none; }
+    .panel-title {
+      font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase;
+      letter-spacing: 0.6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .spec-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px;
+    }
+    .spec-card {
+      background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 8px; padding: 6px 8px;
+    }
+    .spec-k { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+    .spec-v { font-size: 11px; color: #f8fafc; font-weight: 800; margin-top: 1px; }
+
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+    .check-list li {
+      font-size: 11px; color: #e2e8f0; line-height: 1.35;
+      background: rgba(30, 41, 59, 0.55); border-left: 3px solid #22c55e;
+      padding: 5px 7px; border-radius: 0 6px 6px 0;
+    }
+    .check-list li strong { color: #38bdf8; }
+
+    .slider-row { margin-top: 8px; }
+    .slider-label {
+      display: flex; justify-content: space-between; font-size: 11px; color: #cbd5e1; font-weight: 700; margin-bottom: 3px;
+    }
+    input[type="range"] { width: 100%; accent-color: #38bdf8; cursor: pointer; }
+
+    /* Legend Right Pill */
+    .legend-box {
+      position: fixed; top: 72px; right: 12px; z-index: 25;
+      background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(10px);
+      border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 12px;
+      padding: 10px 12px; width: 225px; font-size: 11px;
+    }
+    .leg-row { display: flex; align-items: center; gap: 7px; margin-top: 5px; color: #e2e8f0; font-size: 10.5px; }
+    .swatch { width: 14px; height: 5px; border-radius: 3px; flex-shrink: 0; }
+    .swatch-box { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+    /* Reference Map Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; background: rgba(2, 6, 23, 0.86);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: #0f172a; border: 1px solid #38bdf8; border-radius: 14px;
+      max-width: 960px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 14px;
+    }
+    .modal-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .modal-imgs img { width: 100%; border-radius: 8px; border: 1px solid #334155; }
+
+    /* Bottom Controls */
+    .controls {
+      position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
+      z-index: 30; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+      width: 97%; max-width: 980px;
+      background: rgba(9, 15, 29, 0.92);
+      padding: 8px 12px; border-radius: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    }
+    .btn {
+      background: #1e293b; color: #e2e8f0; border: 1px solid #475569;
+      padding: 6px 11px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;
+    }
+    .btn:hover { border-color: #38bdf8; color: #fff; }
+    .btn.active {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: #38bdf8; color: #fff;
+    }
+    .btn.accent {
+      background: linear-gradient(135deg, #059669, #0d9488);
+      border-color: #34d399; color: #fff;
+    }
+    .btn.warn {
+      background: linear-gradient(135deg, #d97706, #ea580c);
+      border-color: #fbbf24; color: #fff;
+    }
+
+    /* 3D HTML Labels */
+    #labels-layer { position: fixed; inset: 0; pointer-events: none; z-index: 15; overflow: hidden; }
+    .map-label {
+      position: absolute; transform: translate(-50%, -100%);
+      padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: 800;
+      white-space: nowrap; pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.95);
+    }
+    .lbl-town { background: rgba(15, 23, 42, 0.84); color: #f8fafc; border: 1px solid rgba(251, 191, 36, 0.65); }
+    .lbl-water { background: rgba(3, 105, 161, 0.90); color: #e0f2fe; border: 1px solid #38bdf8; }
+    .lbl-hw { background: rgba(6, 95, 70, 0.92); color: #a7f3d0; border: 1px solid #34d399; }
+    .lbl-bp { background: rgba(153, 27, 27, 0.88); color: #fecaca; border: 1px solid #f87171; font-size: 9px; }
+    .lbl-bridge { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; border: 1px solid #fde68a; font-size: 11px; padding: 3px 8px; }
+
+    .loader-overlay {
+      position: fixed; inset: 0; z-index: 80;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(2, 6, 23, 0.92); backdrop-filter: blur(8px); transition: opacity 0.35s ease;
+    }
+    .loader-box {
+      background: #0f172a; border: 1px solid #38bdf8; padding: 22px 28px;
+      border-radius: 16px; text-align: center; max-width: 360px; width: 88%;
+    }
+    .progress-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 99px; overflow: hidden; margin-top: 12px; }
+    .progress-fill { height: 100%; width: 20%; background: linear-gradient(90deg, #38bdf8, #22c55e); transition: width 0.2s ease; }
+
+    @media (max-width: 820px) {
+      .side-panel { width: 275px; top: 84px; }
+      .legend-box { display: none; }
+      .modal-imgs { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <span class="brand-badge">autoAbode Defence 3D • Indian Army Tactical Sand Model</span>
+      <div class="title">BATHINDA SECTOR (64 UNIT) — 3D TERRAIN, EXACT WATER BODIES &amp; DISTRIBUTARIES</div>
+      <div class="sub">Sri Ganganagar – Abohar – Karanpur – Padampur – Raisinghnagar – Suratgarh – Anupgarh – Bahawalnagar – Sutlej Network • Printed 8.0 ft × 7.0 ft Scale</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="togglePanel()">📋 Specs &amp; Feedback</button>
+      <button class="btn" onclick="toggleRefModal(true)">🗺️ Client Reference Maps</button>
+      <button class="btn accent" onclick="exportTerrainSTL()">⬇ Download 3D-Print STL</button>
+    </div>
+  </div>
+
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-title">
+      <span>100% Client Scope &amp; Feedback Covered</span>
+      <button class="btn" style="padding:2px 7px;font-size:10px;" onclick="togglePanel()">✕</button>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-card">
+        <div class="spec-k">Physical Board Size</div>
+        <div class="spec-v">8.0 ft × 7.0 ft (2438×2134 mm)</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-k">Ground Sector Span</div>
+        <div class="spec-v">152 km × 148 km (SRTM DEM)</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-k">Elevation Range</div>
+        <div class="spec-v" id="elStat">155 m – 238 m MSL</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-k">Hydrology Network</div>
+        <div class="spec-v">18 Rivers, Canals &amp; Distys</div>
+      </div>
+    </div>
+
+    <ul class="check-list">
+      <li><strong>Exact Water Bodies &amp; Distributaries (12-Nov Map):</strong> Expanded NE &amp; NW to include <em>Sutlej River, Suleimanke HW (SMK HW), Marinihal HW, Abohar/Sirhind Branch, Gang (Bikaner) Canal, Ganganagar Disty, Karanpur &amp; Rupnagar Disty, Padampur Disty, RSH Disty, IGNP/Suratgarh &amp; Anupgarh Branch</em> + opposite-side <em>Fordwah, Eastern Sadiqia (Hakra), Muridpur, Sunda &amp; Dungarwas Distys</em>.</li>
+      <li><strong>Core Sector Box Preserved:</strong> Original tactical bounding box (<em>Sri Ganganagar – Karanpur – Padampur – Gajsinghpur – Raisinghnagar – Suratgarh – Anupgarh – Fort Abbas – Haroonabad – Chishtian – Bahawalnagar – Sahuka</em>) marked with gold boundary frame.</li>
+      <li><strong>Dummy Sarvatra Bridge (05-Nov Request):</strong> Scaled 3D multi-span mobile military bridge across canal/river obstacle with live span-launch animation.</li>
+      <li><strong>AI Terrain Analysis &amp; MeshVani Comms:</strong> 1-click Go / Slow-Go / No-Go mobility map + 6× tactical RF relay nodes with LOS domes.</li>
+      <li><strong>Printed Size in FT:</strong> Clear <code>0–8 FT</code> &amp; <code>0–7 FT</code> rulers printed on all 4 physical base edges.</li>
+    </ul>
+
+    <div class="slider-row">
+      <div class="slider-label"><span>Vertical Terrain Relief</span><span id="exagVal">4.5×</span></div>
+      <input type="range" min="1" max="10" step="0.5" value="4.5" oninput="setExaggeration(this.value)" />
+    </div>
+    <div class="slider-row">
+      <div class="slider-label"><span>Water &amp; Distributary Highlight</span><span id="waterVal">1.4×</span></div>
+      <input type="range" min="0.6" max="2.5" step="0.1" value="1.4" oninput="setWaterGlow(this.value)" />
+    </div>
+  </div>
+
+  <div class="legend-box">
+    <div style="font-weight:800;color:#38bdf8;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;">Tactical &amp; Hydrological Legend</div>
+    <div class="leg-row"><span class="swatch" style="background:#0ea5e9;height:7px;"></span>Sutlej River &amp; Barrages (HW)</div>
+    <div class="leg-row"><span class="swatch" style="background:#38bdf8;"></span>Main Canals (Gang / Abohar / IGNP / Fordwah / ESC)</div>
+    <div class="leg-row"><span class="swatch" style="background:#facc15;"></span>Highlighted Distributaries (Ganganagar, Karanpur, Rupnagar, Padampur, RSH)</div>
+    <div class="leg-row"><span class="swatch" style="background:#ef4444;"></span>International Border (BP 260–345)</div>
+    <div class="leg-row"><span class="swatch" style="background:#fb923c;"></span>Core Sand Model Bounding Box</div>
+    <div class="leg-row"><span class="swatch-box" style="background:#f59e0b;"></span>3D Dummy Sarvatra Bridge</div>
+    <div class="leg-row"><span class="swatch-box" style="background:#10b981;"></span>MeshVani Comms Relay Nodes</div>
+  </div>
+
+  <div class="modal-overlay" id="refModal" onclick="if(event.target===this)toggleRefModal(false)">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-weight:800;color:#38bdf8;font-size:14px;">Client Reference Maps Integrated into 3D Model</div>
+        <button class="btn" onclick="toggleRefModal(false)">✕ Close</button>
+      </div>
+      <div class="modal-imgs">
+        <div>
+          <div style="font-size:11px;color:#cbd5e1;margin-bottom:4px;font-weight:700;">1. Exact Water Bodies &amp; Distributaries Map (Yellow Highlights + Sutlej &amp; Headworks)</div>
+          <img src="./assets/adarsh_water_map.jpg" alt="Water Bodies & Distributaries Map" />
+        </div>
+        <div>
+          <div style="font-size:11px;color:#cbd5e1;margin-bottom:4px;font-weight:700;">2. Core Tactical Sector Bounding Box (Sri Ganganagar – Suratgarh – Anupgarh – Bahawalnagar)</div>
+          <img src="./assets/col_sunil_sector_box.jpg" alt="Core Sand Model Sector" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loader-overlay" id="loader">
+    <div class="loader-box">
+      <div style="font-size:15px;font-weight:800;color:#38bdf8;">Building Bathinda 3D Tactical Sand Model...</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:5px;" id="loadStatus">Loading SRTM Elevation &amp; Exact Canal/Distributary Network...</div>
+      <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+  </div>
+
+  <div id="labels-layer"></div>
+  <div id="canvas-container"></div>
+
+  <div class="controls">
+    <button class="btn active" id="modeSat" onclick="setSurfaceMode('sat')">🛰️ Satellite + Hydrology</button>
+    <button class="btn" id="modeMap" onclick="setSurfaceMode('milmap')">🗺️ Military Canal Map</button>
+    <button class="btn" id="modeTopo" onclick="setSurfaceMode('topo')">⛰️ Relief Contours</button>
+    <button class="btn" id="modeAI" onclick="setSurfaceMode('ai')">🧠 AI Terrain Analysis</button>
+    <button class="btn warn" id="btnBridgeView" onclick="focusSarvatraBridge()">🌉 Dummy Sarvatra Bridge</button>
+    <button class="btn" id="btnBridgeAnim" onclick="toggleBridgeDeploy()">▶ Launch Bridge Span</button>
+    <button class="btn" id="btnMesh" onclick="toggleMeshVani()">📡 MeshVani Nodes</button>
+    <button class="btn active" id="btnLabels" onclick="toggleLabels()">🏷️ Labels &amp; BPs</button>
+    <button class="btn" id="btnBox" onclick="toggleAcrylicAndTable()">📦 Acrylic Cover &amp; Table</button>
+    <button class="btn" onclick="setCameraPreset('overview')">🧭 Full Sector</button>
+    <button class="btn" onclick="setCameraPreset('top')">📐 Top Plan (FT)</button>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+
+    // Physical Board Dimensions: 8.0 ft (East-West = 243.84 units) x 7.0 ft (North-South = 213.36 units)
+    // Using 1 Three.js unit = 10 mm -> 243.84 x 213.36
+    const BOARD_W = 243.84; // 8.0 ft (2438.4 mm)
+    const BOARD_D = 213.36; // 7.0 ft (2133.6 mm)
+    const BASE_THICK = 5.5;
+
+    const BOUNDS = { lonMin: 72.85, lonMax: 74.42, latMin: 29.10, latMax: 30.45 };
+
+    function geoToXZ(lat, lon) {
+      const u = (lon - BOUNDS.lonMin) / (BOUNDS.lonMax - BOUNDS.lonMin);
+      const v = (BOUNDS.latMax - lat) / (BOUNDS.latMax - BOUNDS.latMin); // 0 at North (-Z), 1 at South (+Z)
+      return {
+        x: (u - 0.5) * BOARD_W,
+        z: (v - 0.5) * BOARD_D,
+        u,
+        v
+      };
+    }
+
+    // Complete Digitized Hydrology Network (Exact Rivers, Main Canals, Distributaries & Headworks from Maj. Adarsh Prem's Map + Krish's CAD)
+    const WATERWAYS = [
+      {
+        name: 'Sutlej (Satluj) River',
+        cat: 'river',
+        width: 2.3,
+        color: 0x0284c7,
+        pts: [
+          [30.44, 74.06], [30.38, 73.87], [30.35, 73.75], [30.34, 73.63],
+          [30.29, 73.52], [30.22, 73.42], [30.14, 73.32], [30.06, 73.21],
+          [29.97, 73.09], [29.89, 72.97], [29.82, 72.86]
+        ]
+      },
+      {
+        name: 'Gang (Bikaner) Main Canal',
+        cat: 'highlighted',
+        width: 1.35,
+        color: 0x38bdf8,
+        pts: [
+          [30.43, 74.36], [30.30, 74.22], [30.18, 74.08], [30.06, 73.95],
+          [29.97, 73.87], [29.90, 73.80], [29.83, 73.73], [29.74, 73.65],
+          [29.63, 73.56], [29.53, 73.49]
+        ]
+      },
+      {
+        name: 'Abohar Branch (Sirhind Canal)',
+        cat: 'highlighted',
+        width: 1.25,
+        color: 0xfacc15,
+        pts: [
+          [30.38, 74.40], [30.26, 74.26], [30.16, 74.18], [30.08, 74.05], [30.01, 73.94]
+        ]
+      },
+      {
+        name: 'Ganganagar Distributary',
+        cat: 'highlighted',
+        width: 1.05,
+        color: 0xfde047,
+        pts: [
+          [30.02, 73.92], [29.94, 73.89], [29.87, 73.83], [29.80, 73.76], [29.73, 73.68]
+        ]
+      },
+      {
+        name: 'Karanpur & Phusewala Distributary',
+        cat: 'highlighted',
+        width: 1.10,
+        color: 0xfacc15,
+        pts: [
+          [30.00, 73.84], [29.93, 73.74], [29.85, 73.65], [29.79, 73.55], [29.73, 73.47]
+        ]
+      },
+      {
+        name: 'Rupnagar Distributary',
+        cat: 'highlighted',
+        width: 0.95,
+        color: 0x38bdf8,
+        pts: [
+          [29.83, 73.68], [29.76, 73.60], [29.69, 73.52], [29.63, 73.45]
+        ]
+      },
+      {
+        name: 'Padampur Distributary',
+        cat: 'highlighted',
+        width: 1.15,
+        color: 0xfacc15,
+        pts: [
+          [29.79, 73.86], [29.73, 73.74], [29.68, 73.62], [29.63, 73.50], [29.58, 73.41]
+        ]
+      },
+      {
+        name: 'RSH (Raisinghnagar) Distributary',
+        cat: 'canal',
+        width: 0.95,
+        color: 0x38bdf8,
+        pts: [
+          [29.62, 73.68], [29.55, 73.56], [29.51, 73.44], [29.46, 73.32]
+        ]
+      },
+      {
+        name: 'IGNP Anupgarh & Suratgarh Branch',
+        cat: 'canal',
+        width: 1.30,
+        color: 0x0ea5e9,
+        pts: [
+          [29.52, 74.32], [29.42, 74.12], [29.34, 73.92], [29.29, 73.68],
+          [29.26, 73.42], [29.21, 73.21], [29.15, 73.06]
+        ]
+      },
+      {
+        name: 'Ghaggar River (Nali Channel)',
+        cat: 'river',
+        width: 1.20,
+        color: 0x0284c7,
+        pts: [
+          [29.58, 74.36], [29.48, 74.14], [29.36, 73.90], [29.32, 73.62],
+          [29.28, 73.35], [29.22, 73.05], [29.18, 72.88]
+        ]
+      },
+      {
+        name: 'Fordwah Canal (Opposite Sector)',
+        cat: 'canal',
+        width: 1.15,
+        color: 0x22d3ee,
+        pts: [
+          [30.38, 73.86], [30.28, 73.76], [30.18, 73.64], [30.09, 73.50],
+          [30.00, 73.35], [29.90, 73.20], [29.80, 73.02]
+        ]
+      },
+      {
+        name: 'Eastern Sadiqia (Hakra) Canal',
+        cat: 'canal',
+        width: 1.20,
+        color: 0x06b6d4,
+        pts: [
+          [30.38, 73.87], [30.25, 73.83], [30.11, 73.74], [29.99, 73.58],
+          [29.89, 73.42], [29.76, 73.34], [29.61, 73.25], [29.44, 73.14],
+          [29.28, 72.98], [29.18, 72.88]
+        ]
+      },
+      {
+        name: 'Muridpur & Awami Distributary',
+        cat: 'canal',
+        width: 0.85,
+        color: 0x38bdf8,
+        pts: [
+          [30.20, 73.79], [30.13, 73.65], [30.05, 73.52], [29.96, 73.38]
+        ]
+      },
+      {
+        name: 'Sunda & Dungarwas Distributary',
+        cat: 'canal',
+        width: 0.85,
+        color: 0x38bdf8,
+        pts: [
+          [29.78, 73.36], [29.69, 73.26], [29.58, 73.18], [29.48, 73.08]
+        ]
+      }
+    ];
+
+    // International Border (IB) Line (BP 260 Suleimanke -> Abohar/Pakki -> Karanpur -> Raisinghnagar -> Anupgarh/Fort Abbas)
+    const IB_LINE = [
+      [30.40, 73.89], [30.30, 73.92], [30.19, 73.90], [30.09, 73.82],
+      [30.01, 73.68], [29.94, 73.51], [29.88, 73.44], [29.75, 73.41],
+      [29.61, 73.36], [29.46, 73.31], [29.31, 73.18], [29.17, 72.96]
+    ];
+
+    // Col. Sunil's Original White Sector Bounding Box (Preserved as Gold Frame inside Expanded Hydrology Board)
+    const CORE_SECTOR_BOX = [
+      [30.14, 73.02], [30.14, 74.06], [29.20, 74.06], [29.20, 73.02], [30.14, 73.02]
+    ];
+
+    // Headworks, Border Pillars & Strategic Towns
+    const POIS = [
+      // Headworks / Barrages
+      { name: 'SMK HW (Suleimanke)', lat: 30.385, lon: 73.865, type: 'hw' },
+      { name: 'Marinihal HW', lat: 30.24, lon: 73.50, type: 'hw' },
+      { name: 'Jalwala HW', lat: 29.88, lon: 73.36, type: 'hw' },
+      { name: 'Gulab Ali HW', lat: 29.67, lon: 73.28, type: 'hw' },
+      { name: 'Mianwali HW', lat: 29.45, lon: 73.22, type: 'hw' },
+      // Key Indian Sector Towns
+      { name: 'ABOHAR', lat: 30.145, lon: 74.199, type: 'town' },
+      { name: 'SRI GANGANAGAR', lat: 29.909, lon: 73.877, type: 'town' },
+      { name: 'SADULSHAHR', lat: 29.892, lon: 74.115, type: 'town' },
+      { name: 'KESRISINGHPUR (KSP)', lat: 29.945, lon: 73.625, type: 'town' },
+      { name: 'SRIKARANPUR', lat: 29.842, lon: 73.455, type: 'town' },
+      { name: 'PADAMPUR', lat: 29.692, lon: 73.618, type: 'town' },
+      { name: 'GAJSINGHPUR', lat: 29.655, lon: 73.515, type: 'town' },
+      { name: 'RAISINGHNAGAR (RS NAGAR)', lat: 29.535, lon: 73.448, type: 'town' },
+      { name: 'HANUMANGARH', lat: 29.581, lon: 74.329, type: 'town' },
+      { name: 'SURATGARH', lat: 29.322, lon: 73.899, type: 'town' },
+      { name: 'SRI VIJAYNAGAR', lat: 29.328, lon: 73.552, type: 'town' },
+      { name: 'ANUPGARH', lat: 29.191, lon: 73.208, type: 'town' },
+      // Opposite Sector Towns
+      { name: 'PAKPATTAN', lat: 30.341, lon: 73.388, type: 'town' },
+      { name: 'ARIFWALA', lat: 30.290, lon: 73.068, type: 'town' },
+      { name: 'MINCHINABAD', lat: 30.165, lon: 73.568, type: 'town' },
+      { name: 'BAHAWALNAGAR', lat: 29.998, lon: 73.253, type: 'town' },
+      { name: 'CHISHTIAN', lat: 29.795, lon: 72.905, type: 'town' },
+      { name: 'HAROONABAD', lat: 29.612, lon: 73.138, type: 'town' },
+      { name: 'FORT ABBAS', lat: 29.193, lon: 72.893, type: 'town' },
+      // Border Pillars
+      { name: 'BP 273', lat: 30.25, lon: 73.92, type: 'bp' },
+      { name: 'BP 292', lat: 30.03, lon: 73.72, type: 'bp' },
+      { name: 'BP 311', lat: 29.91, lon: 73.46, type: 'bp' },
+      { name: 'BP 325', lat: 29.76, lon: 73.41, type: 'bp' },
+      { name: 'BP 345', lat: 29.47, lon: 73.31, type: 'bp' }
+    ];
+
+    let scene, camera, renderer, controls;
+    let demData = null;
+    let terrainMesh = null, terrainGeo = null, basePedestal = null;
+    let satTex = null, milMapTex = null, topoTex = null, aiTex = null;
+    let waterGroup = new THREE.Group();
+    let meshVaniGroup = new THREE.Group();
+    let enclosureGroup = new THREE.Group();
+    let bridgeGroup = new THREE.Group();
+    let bridgeSpan1, bridgeSpan2, bridgeSpan3;
+    let bridgeDeployProgress = 1.0, bridgeAnimating = false, bridgeTarget = 1.0;
+
+    let currentExag = 4.5;
+    let waterScale = 1.4;
+    let showLabels = true;
+    let showMeshVani = false;
+    let showEnclosure = false;
+    const htmlLabels = [];
+
+    const container = document.getElementById('canvas-container');
+    const labelsLayer = document.getElementById('labels-layer');
+
+    function setProgress(pct, msg) {
+      document.getElementById('progFill').style.width = pct + '%';
+      if (msg) document.getElementById('loadStatus').textContent = msg;
+    }
+
+    function sampleDemHeight(u, v) {
+      if (!demData) return 2.0;
+      const gx = Math.min(demData.gridW - 1, Math.max(0, u * (demData.gridW - 1)));
+      const gy = Math.min(demData.gridH - 1, Math.max(0, v * (demData.gridH - 1)));
+      const x0 = Math.floor(gx), x1 = Math.min(demData.gridW - 1, x0 + 1);
+      const y0 = Math.floor(gy), y1 = Math.min(demData.gridH - 1, y0 + 1);
+      const fx = gx - x0, fy = gy - y0;
+      const e00 = demData.grid[y0][x0], e10 = demData.grid[y0][x1];
+      const e01 = demData.grid[y1][x0], e11 = demData.grid[y1][x1];
+      const el = (e00 * (1 - fx) + e10 * fx) * (1 - fy) + (e01 * (1 - fx) + e11 * fx) * fy;
+      const norm = (el - demData.minEl) / Math.max(1, demData.maxEl - demData.minEl);
+      return BASE_THICK + 0.6 + norm * 3.2 * currentExag;
+    }
+
+    function makeRulerCanvas(lengthFt, mmText, subText, ticksCount) {
+      const c = document.createElement('canvas');
+      c.width = 2048; c.height = 180;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(3, 3, c.width - 6, c.height - 6);
+
+      // Foot ticks
+      for (let i = 0; i <= ticksCount * 4; i++) {
+        const x = 40 + (i / (ticksCount * 4)) * (c.width - 80);
+        const isFoot = i % 4 === 0;
+        ctx.strokeStyle = isFoot ? '#facc15' : '#64748b';
+        ctx.lineWidth = isFoot ? 5 : 2;
+        ctx.beginPath();
+        ctx.moveTo(x, 6);
+        ctx.lineTo(x, isFoot ? 52 : 28);
+        ctx.stroke();
+        if (isFoot) {
+          ctx.fillStyle = '#facc15';
+          ctx.font = 'bold 30px Segoe UI, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${i / 4} FT`, x, 84);
+        }
+      }
+
+      // Main printed dimension banner
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '900 44px Segoe UI, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`◀───  MODEL SIZE: ${lengthFt} (${mmText})  •  ${subText}  ───▶`, c.width / 2, 148);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.anisotropy = 8;
+      return tex;
+    }
+
+    function buildProceduralTextures() {
+      // 1) Hypsometric Topo + Contours Texture
+      const c1 = document.createElement('canvas');
+      c1.width = 1024; c1.height = 896;
+      const ctx1 = c1.getContext('2d');
+      const img1 = ctx1.createImageData(c1.width, c1.height);
+
+      // 2) AI Terrain Mobility Texture (GO = Green, SLOW-GO = Amber, NO-GO = Red/Blue Obstacles)
+      const c2 = document.createElement('canvas');
+      c2.width = 1024; c2.height = 896;
+      const ctx2 = c2.getContext('2d');
+      const img2 = ctx2.createImageData(c2.width, c2.height);
+
+      for (let py = 0; py < c1.height; py++) {
+        const v = py / (c1.height - 1);
+        for (let px = 0; px < c1.width; px++) {
+          const u = px / (c1.width - 1);
+          const gx = Math.min(demData.gridW - 1, Math.floor(u * (demData.gridW - 1)));
+          const gy = Math.min(demData.gridH - 1, Math.floor(v * (demData.gridH - 1)));
+          const el = demData.grid[gy][gx];
+          const norm = (el - demData.minEl) / Math.max(1, demData.maxEl - demData.minEl);
+          const idx = (py * c1.width + px) * 4;
+
+          // Contour lines every 4 meters
+          const isContour = Math.abs((el % 4) - 2) > 1.78;
+          let r, g, b;
+          if (norm < 0.25) { r = 46; g = 125; b = 82; }
+          else if (norm < 0.50) { r = 104; g = 158; b = 88; }
+          else if (norm < 0.75) { r = 198; g = 172; b = 108; }
+          else { r = 185; g = 132; b = 82; }
+          if (isContour) { r *= 0.62; g *= 0.62; b *= 0.62; }
+          img1.data[idx] = r; img1.data[idx + 1] = g; img1.data[idx + 2] = b; img1.data[idx + 3] = 255;
+
+          // AI Mobility: Southern dune belt (v > 0.72 & norm > 0.62) = Slow/No-Go; River floodplain (norm < 0.18) = Obstacle; Mid plains = GO
+          let ar = 34, ag = 197, ab = 94; // GO Corridor
+          if (norm < 0.20) { ar = 239; ag = 68; ab = 68; } // Floodplain / Soft Riverbank NO-GO
+          else if (v > 0.70 && norm > 0.52) { ar = 245; ag = 158; ab = 11; } // Thar Sand Dunes SLOW-GO
+          else if ((px + py) % 28 < 2) { ar = 22; ag = 163; ab = 74; }
+          img2.data[idx] = ar; img2.data[idx + 1] = ag; img2.data[idx + 2] = ab; img2.data[idx + 3] = 255;
+        }
+      }
+      ctx1.putImageData(img1, 0, 0);
+      ctx2.putImageData(img2, 0, 0);
+
+      // Draw Canal Obstacle Buffers on AI Mobility canvas
+      ctx2.lineCap = 'round';
+      for (const w of WATERWAYS) {
+        ctx2.strokeStyle = w.cat === 'river' ? 'rgba(220,38,38,0.95)' : 'rgba(234,88,12,0.85)';
+        ctx2.lineWidth = w.cat === 'river' ? 18 : 9;
+        ctx2.beginPath();
+        w.pts.forEach(([lat, lon], i) => {
+          const { u, v } = geoToXZ(lat, lon);
+          if (i === 0) ctx2.moveTo(u * c2.width, v * c2.height);
+          else ctx2.lineTo(u * c2.width, v * c2.height);
+        });
+        ctx2.stroke();
+      }
+
+      topoTex = new THREE.CanvasTexture(c1);
+      topoTex.colorSpace = THREE.SRGBColorSpace;
+      aiTex = new THREE.CanvasTexture(c2);
+      aiTex.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    function buildTerrainAndBase() {
+      const segX = demData.gridW - 1;
+      const segZ = demData.gridH - 1;
+      terrainGeo = new THREE.PlaneGeometry(BOARD_W, BOARD_D, segX, segZ);
+      terrainGeo.rotateX(-Math.PI / 2);
+
+      updateTerrainVertices();
+
+      const mat = new THREE.MeshStandardMaterial({
+        map: satTex,
+        roughness: 0.78,
+        metalness: 0.06
+      });
+      terrainMesh = new THREE.Mesh(terrainGeo, mat);
+      terrainMesh.castShadow = true;
+      terrainMesh.receiveShadow = true;
+      scene.add(terrainMesh);
+
+      // Solid black/slate side skirt + printed FT rulers on ALL 4 sides
+      const ruler8Ft = makeRulerCanvas('8.0 FT LENGTH', '2,438 mm', '152 km East–West Sector', 8);
+      const ruler7Ft = makeRulerCanvas('7.0 FT BREADTH', '2,134 mm', '148 km North–South Sector', 7);
+
+      const topBotMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
+      const mat8 = new THREE.MeshStandardMaterial({ map: ruler8Ft, roughness: 0.4 });
+      const mat7 = new THREE.MeshStandardMaterial({ map: ruler7Ft, roughness: 0.4 });
+
+      // BoxGeometry material order: +X (East 7ft), -X (West 7ft), +Y (Top), -Y (Bottom), +Z (South 8ft), -Z (North 8ft)
+      const baseGeo = new THREE.BoxGeometry(BOARD_W + 2.4, BASE_THICK + 1.2, BOARD_D + 2.4);
+      basePedestal = new THREE.Mesh(baseGeo, [mat7, mat7, topBotMat, topBotMat, mat8, mat8]);
+      basePedestal.position.y = BASE_THICK / 2;
+      basePedestal.receiveShadow = true;
+      scene.add(basePedestal);
+
+      // North Arrow 3D Compass Badge on NE Corner
+      const compassGroup = new THREE.Group();
+      const arrowGeo = new THREE.ConeGeometry(2.6, 8.5, 4);
+      arrowGeo.rotateX(-Math.PI / 2);
+      const arrowMesh = new THREE.Mesh(arrowGeo, new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x7f1d1d }));
+      compassGroup.add(arrowMesh);
+      compassGroup.position.set(BOARD_W / 2 - 10, BASE_THICK + 14, -BOARD_D / 2 + 12);
+      scene.add(compassGroup);
+      registerLabel('⬆ NORTH', compassGroup.position.clone().add(new THREE.Vector3(0, 4, 0)), 'lbl-bp', true);
+    }
+
+    function updateTerrainVertices() {
+      const pos = terrainGeo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const z = pos.getZ(i);
+        const u = x / BOARD_W + 0.5;
+        const v = z / BOARD_D + 0.5;
+        pos.setY(i, sampleDemHeight(u, v));
+      }
+      pos.needsUpdate = true;
+      terrainGeo.computeVertexNormals();
+    }
+
+    function buildRibbonAlongGeo(pts, halfWidth, colorHex, yLift, emissiveHex = 0x000000, emissiveInt = 0.25) {
+      const curvePts = pts.map(([lat, lon]) => {
+        const { x, z, u, v } = geoToXZ(lat, lon);
+        return new THREE.Vector3(x, sampleDemHeight(u, v) + yLift, z);
+      });
+      const curve = new THREE.CatmullRomCurve3(curvePts);
+      const samples = Math.max(40, pts.length * 16);
+      const sp = curve.getPoints(samples);
+
+      const positions = [];
+      const indices = [];
+      for (let i = 0; i < sp.length; i++) {
+        const p = sp[i];
+        const prev = sp[Math.max(0, i - 1)];
+        const next = sp[Math.min(sp.length - 1, i + 1)];
+        const dir = new THREE.Vector3().subVectors(next, prev).setY(0).normalize();
+        const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+        const u = p.x / BOARD_W + 0.5;
+        const v = p.z / BOARD_D + 0.5;
+        const h = sampleDemHeight(u, v) + yLift;
+        positions.push(
+          p.x - perp.x * halfWidth, h, p.z - perp.z * halfWidth,
+          p.x + perp.x * halfWidth, h, p.z + perp.z * halfWidth
+        );
+        if (i < sp.length - 1) {
+          const a = i * 2, b = i * 2 + 1, c = i * 2 + 2, d = i * 2 + 3;
+          indices.push(a, c, b, b, c, d);
+        }
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: colorHex,
+        emissive: emissiveHex || colorHex,
+        emissiveIntensity: emissiveInt,
+        roughness: 0.22,
+        metalness: 0.35,
+        side: THREE.DoubleSide
+      });
+      return { mesh: new THREE.Mesh(geo, mat), midPoint: sp[Math.floor(sp.length * 0.5)] };
+    }
+
+    function rebuildOverlays() {
+      scene.remove(waterGroup);
+      waterGroup = new THREE.Group();
+
+      for (const w of WATERWAYS) {
+        const hw = w.width * 0.55 * waterScale;
+        const emInt = w.cat === 'highlighted' ? 0.55 : (w.cat === 'river' ? 0.42 : 0.32);
+        const { mesh, midPoint } = buildRibbonAlongGeo(w.pts, hw, w.color, 0.38, w.color, emInt);
+        waterGroup.add(mesh);
+      }
+
+      // International Border (IB) Red Tactical Line
+      const ib = buildRibbonAlongGeo(IB_LINE, 0.45, 0xef4444, 0.52, 0xdc2626, 0.65);
+      waterGroup.add(ib.mesh);
+
+      // Col. Sunil's Original White/Gold Sector Bounding Box
+      const coreBox = buildRibbonAlongGeo(CORE_SECTOR_BOX, 0.42, 0xfb923c, 0.58, 0xf97316, 0.60);
+      waterGroup.add(coreBox.mesh);
+
+      // POI 3D Pins
+      for (const p of POIS) {
+        const { x, z, u, v } = geoToXZ(p.lat, p.lon);
+        const y = sampleDemHeight(u, v);
+        let col = 0xfbbf24, r = 0.85, h = 2.5;
+        if (p.type === 'hw') { col = 0x10b981; r = 1.25; h = 3.6; }
+        else if (p.type === 'bp') { col = 0xef4444; r = 0.7; h = 2.2; }
+        const pin = new THREE.Mesh(
+          new THREE.CylinderGeometry(r, r * 0.35, h, 12),
+          new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.35 })
+        );
+        pin.position.set(x, y + h / 2, z);
+        waterGroup.add(pin);
+      }
+
+      scene.add(waterGroup);
+      updateDummyBridgeTransform();
+      updateMeshVaniHeights();
+    }
+
+    function buildDummySarvatraBridge() {
+      // Placed at strategic Gang Canal / Sutlej-Suleimanke crossing sector (30.04°N, 73.93°E near Sri Ganganagar / Mohanpura canal crossing)
+      bridgeGroup = new THREE.Group();
+
+      const oliveMat = new THREE.MeshStandardMaterial({ color: 0x4d5d2b, roughness: 0.5, metalness: 0.35 });
+      const trussMat = new THREE.MeshStandardMaterial({ color: 0xd97706, emissive: 0x92400e, emissiveIntensity: 0.28, roughness: 0.35, metalness: 0.6 });
+      const deckMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6, metalness: 0.5 });
+      const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 });
+
+      // 8x8 Tatra Launching Vehicle (Scaled tactical showcase size on board)
+      const truck = new THREE.Group();
+      const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 6.2), oliveMat);
+      chassis.position.set(0, 0.95, -5.2);
+      truck.add(chassis);
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(2.3, 1.5, 1.9), oliveMat);
+      cab.position.set(0, 1.8, -7.2);
+      truck.add(cab);
+      for (const wz of [-7.4, -6.0, -4.4, -3.0]) {
+        for (const wx of [-1.25, 1.25]) {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.35, 14), tireMat);
+          wheel.rotation.z = Math.PI / 2;
+          wheel.position.set(wx, 0.55, wz);
+          truck.add(wheel);
+        }
+      }
+      bridgeGroup.add(truck);
+
+      // Concrete Abutment Banks + Trestle Piers
+      for (const bz of [-2.0, 12.0]) {
+        const bank = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.2, 1.4), deckMat);
+        bank.position.set(0, 0.6, bz);
+        bridgeGroup.add(bank);
+      }
+      for (const pz of [2.6, 7.4]) {
+        for (const px of [-1.35, 1.35]) {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 2.2, 10), trussMat);
+          leg.position.set(px, 0.9, pz);
+          bridgeGroup.add(leg);
+        }
+      }
+
+      function createSpanModule() {
+        const g = new THREE.Group();
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.26, 4.8), deckMat);
+        g.add(deck);
+        for (const sx of [-1.45, 1.45]) {
+          const rail = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.85, 4.8), trussMat);
+          rail.position.set(sx, 0.45, 0);
+          g.add(rail);
+        }
+        // Yellow tactical treadways
+        for (const tx of [-0.85, 0.85]) {
+          const tread = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.30, 4.75), trussMat);
+          tread.position.set(tx, 0.03, 0);
+          g.add(tread);
+        }
+        return g;
+      }
+
+      bridgeSpan1 = createSpanModule();
+      bridgeSpan2 = createSpanModule();
+      bridgeSpan3 = createSpanModule();
+      bridgeGroup.add(bridgeSpan1, bridgeSpan2, bridgeSpan3);
+
+      // Glowing beacon ring under Dummy Bridge so client spots it effortlessly
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(5.5, 6.4, 32),
+        new THREE.MeshBasicMaterial({ color: 0xfbbf24, side: THREE.DoubleSide, transparent: true, opacity: 0.75 })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(0, 0.25, 4.8);
+      bridgeGroup.add(ring);
+
+      scene.add(bridgeGroup);
+      applyBridgeSpanPositions(1.0);
+    }
+
+    function applyBridgeSpanPositions(t) {
+      // t = 0 (stowed on Tatra launcher at z = -4.5) -> t = 1 (3-span 45m/75m deployed bridge across canal z = 0.3, 5.0, 9.7)
+      bridgeSpan1.position.set(0, 1.85, -4.2 + t * 4.5);
+      bridgeSpan2.position.set(0, 1.85 + (1 - t) * 0.65, -4.2 + t * 9.2);
+      bridgeSpan3.position.set(0, 1.85 + (1 - t) * 1.30, -4.2 + t * 13.9);
+    }
+
+    function updateDummyBridgeTransform() {
+      const { x, z, u, v } = geoToXZ(30.05, 73.96);
+      const y = sampleDemHeight(u, v);
+      bridgeGroup.position.set(x, y + 0.25, z);
+      bridgeGroup.rotation.y = Math.PI * 0.24;
+    }
+
+    function buildMeshVaniNodes() {
+      meshVaniGroup = new THREE.Group();
+      const nodes = [
+        { name: 'Node-1 Abohar HQ', lat: 30.145, lon: 74.199 },
+        { name: 'Node-2 Sri Ganganagar', lat: 29.909, lon: 73.877 },
+        { name: 'Node-3 Srikaranpur IB', lat: 29.842, lon: 73.455 },
+        { name: 'Node-4 Padampur Relay', lat: 29.692, lon: 73.618 },
+        { name: 'Node-5 Raisinghnagar', lat: 29.535, lon: 73.448 },
+        { name: 'Node-6 Suratgarh South', lat: 29.322, lon: 73.899 }
+      ];
+      meshVaniGroup.userData.nodes = nodes;
+      meshVaniGroup.visible = showMeshVani;
+      scene.add(meshVaniGroup);
+      updateMeshVaniHeights();
+    }
+
+    function updateMeshVaniHeights() {
+      if (!meshVaniGroup.userData.nodes) return;
+      while (meshVaniGroup.children.length) meshVaniGroup.remove(meshVaniGroup.children[0]);
+
+      const pts = [];
+      for (const n of meshVaniGroup.userData.nodes) {
+        const { x, z, u, v } = geoToXZ(n.lat, n.lon);
+        const y = sampleDemHeight(u, v);
+        const top = new THREE.Vector3(x, y + 8.5, z);
+        pts.push(top);
+
+        const mast = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.28, 0.45, 8.5, 10),
+          new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x059669, emissiveIntensity: 0.6 })
+        );
+        mast.position.set(x, y + 4.25, z);
+        meshVaniGroup.add(mast);
+
+        const dome = new THREE.Mesh(
+          new THREE.SphereGeometry(22, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.5),
+          new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.13, wireframe: false, side: THREE.DoubleSide })
+        );
+        dome.position.set(x, y + 0.2, z);
+        meshVaniGroup.add(dome);
+      }
+
+      // LOS RF Mesh Links
+      const pairs = [[0,1],[1,2],[1,3],[2,3],[3,4],[3,5],[4,5]];
+      for (const [a, b] of pairs) {
+        const lineGeo = new THREE.BufferGeometry().setFromPoints([pts[a], pts[b]]);
+        const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x34d399, linewidth: 2 }));
+        meshVaniGroup.add(line);
+      }
+    }
+
+    function buildEnclosureAndTable() {
+      enclosureGroup = new THREE.Group();
+      // 5mm Clear Acrylic Cover Box
+      const acrGeo = new THREE.BoxGeometry(BOARD_W + 2.8, 36, BOARD_D + 2.8);
+      const acrMat = new THREE.MeshPhysicalMaterial({
+        color: 0xe0f2fe,
+        transparent: true,
+        opacity: 0.16,
+        roughness: 0.05,
+        transmission: 0.82,
+        side: THREE.DoubleSide
+      });
+      const acrBox = new THREE.Mesh(acrGeo, acrMat);
+      acrBox.position.y = 18;
+      enclosureGroup.add(acrBox);
+
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(acrGeo),
+        new THREE.LineBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.65 })
+      );
+      edges.position.copy(acrBox.position);
+      enclosureGroup.add(edges);
+
+      // Designer Teak Wooden Display Table
+      const woodMat = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.55, metalness: 0.1 });
+      const apron = new THREE.Mesh(new THREE.BoxGeometry(BOARD_W + 8, 9, BOARD_D + 8), woodMat);
+      apron.position.y = -4.6;
+      enclosureGroup.add(apron);
+
+      const legOffsets = [
+        [-BOARD_W / 2, -BOARD_D / 2], [BOARD_W / 2, -BOARD_D / 2],
+        [-BOARD_W / 2, BOARD_D / 2], [BOARD_W / 2, BOARD_D / 2]
+      ];
+      for (const [lx, lz] of legOffsets) {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(6.5, 68, 6.5), woodMat);
+        leg.position.set(lx, -38, lz);
+        enclosureGroup.add(leg);
+      }
+      enclosureGroup.visible = false;
+      scene.add(enclosureGroup);
+    }
+
+    function registerLabel(text, worldPosOrFn, cls, always = false) {
+      const el = document.createElement('div');
+      el.className = `map-label ${cls}`;
+      el.textContent = text;
+      labelsLayer.appendChild(el);
+      htmlLabels.push({ el, worldPosOrFn, always });
+    }
+
+    function setupAllLabels() {
+      // Key Canal & Distributary Labels
+      const waterLabels = [
+        { txt: '🌊 Sutlej (Satluj) River', lat: 30.28, lon: 73.50 },
+        { txt: '💧 Gang (Bikaner) Canal', lat: 30.08, lon: 73.98 },
+        { txt: '⭐ Abohar / Sirhind Branch', lat: 30.24, lon: 74.26 },
+        { txt: '⭐ Ganganagar Disty', lat: 29.87, lon: 73.84 },
+        { txt: '⭐ Karanpur & Rupnagar Disty', lat: 29.85, lon: 73.63 },
+        { txt: '⭐ Padampur Disty', lat: 29.69, lon: 73.66 },
+        { txt: '💧 RSH Disty', lat: 29.55, lon: 73.55 },
+        { txt: '💧 IGNP / Anupgarh Branch', lat: 29.29, lon: 73.68 },
+        { txt: '💧 Fordwah Canal', lat: 30.12, lon: 73.55 },
+        { txt: '💧 Eastern Sadiqia (Hakra) Canal', lat: 29.93, lon: 73.46 }
+      ];
+      for (const wl of waterLabels) {
+        registerLabel(wl.txt, () => {
+          const { x, z, u, v } = geoToXZ(wl.lat, wl.lon);
+          return new THREE.Vector3(x, sampleDemHeight(u, v) + 2.2, z);
+        }, 'lbl-water');
+      }
+
+      for (const p of POIS) {
+        const cls = p.type === 'hw' ? 'lbl-hw' : (p.type === 'bp' ? 'lbl-bp' : 'lbl-town');
+        registerLabel(p.name, () => {
+          const { x, z, u, v } = geoToXZ(p.lat, p.lon);
+          return new THREE.Vector3(x, sampleDemHeight(u, v) + 3.6, z);
+        }, cls);
+      }
+
+      registerLabel('🌉 3D Dummy Sarvatra Bridge (Multi-Span)', () => {
+        return bridgeGroup.position.clone().add(new THREE.Vector3(0, 6.2, 2));
+      }, 'lbl-bridge', true);
+    }
+
+    function updateHtmlLabels() {
+      const w = window.innerWidth, h = window.innerHeight;
+      for (const item of htmlLabels) {
+        if (!showLabels && !item.always) {
+          item.el.style.display = 'none';
+          continue;
+        }
+        const pos = typeof item.worldPosOrFn === 'function' ? item.worldPosOrFn() : item.worldPosOrFn.clone();
+        const proj = pos.project(camera);
+        if (proj.z > 1 || proj.x < -1.05 || proj.x > 1.05 || proj.y < -1.05 || proj.y > 1.05) {
+          item.el.style.display = 'none';
+          continue;
+        }
+        item.el.style.display = 'block';
+        item.el.style.left = ((proj.x * 0.5 + 0.5) * w) + 'px';
+        item.el.style.top = ((-proj.y * 0.5 + 0.5) * h) + 'px';
+      }
+    }
+
+    async function init() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 1, 2200);
+      camera.position.set(0, 185, 225);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.12;
+      container.appendChild(renderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.target.set(0, 8, 5);
+      controls.maxPolarAngle = Math.PI * 0.485;
+      controls.minDistance = 24;
+      controls.maxDistance = 520;
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+      const sun = new THREE.DirectionalLight(0xfff7ed, 1.55);
+      sun.position.set(140, 220, 110);
+      scene.add(sun);
+      const fill = new THREE.DirectionalLight(0x38bdf8, 0.45);
+      fill.position.set(-150, 90, -120);
+      scene.add(fill);
+
+      setProgress(35, 'Loading Real SRTM DEM Grid & Satellite Imagery...');
+      const demRes = await fetch('./assets/bathinda_dem.json');
+      demData = await demRes.json();
+      document.getElementById('elStat').textContent = `${Math.round(demData.minEl)} m – ${Math.round(demData.maxEl)} m MSL`;
+
+      const texLoader = new THREE.TextureLoader();
+      [satTex, milMapTex] = await Promise.all([
+        texLoader.loadAsync('./assets/bathinda_satellite.jpg'),
+        texLoader.loadAsync('./assets/adarsh_water_map.jpg')
+      ]);
+      satTex.colorSpace = THREE.SRGBColorSpace;
+      satTex.anisotropy = 8;
+      milMapTex.colorSpace = THREE.SRGBColorSpace;
+      milMapTex.anisotropy = 8;
+
+      setProgress(75, 'Constructing 3D Canal/Distributary Network & Dummy Sarvatra Bridge...');
+      buildProceduralTextures();
+      buildTerrainAndBase();
+      buildDummySarvatraBridge();
+      buildMeshVaniNodes();
+      buildEnclosureAndTable();
+      rebuildOverlays();
+      setupAllLabels();
+
+      setProgress(100, 'Ready!');
+      setTimeout(() => {
+        const ld = document.getElementById('loader');
+        ld.style.opacity = '0';
+        setTimeout(() => ld.remove(), 380);
+      }, 250);
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      animate();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (bridgeAnimating) {
+        const diff = bridgeTarget - bridgeDeployProgress;
+        if (Math.abs(diff) < 0.008) {
+          bridgeDeployProgress = bridgeTarget;
+          bridgeAnimating = false;
+        } else {
+          bridgeDeployProgress += Math.sign(diff) * 0.014;
+        }
+        applyBridgeSpanPositions(bridgeDeployProgress);
+      }
+      controls.update();
+      renderer.render(scene, camera);
+      updateHtmlLabels();
+    }
+
+    // Global UI Controls
+    window.togglePanel = () => document.getElementById('sidePanel').classList.toggle('collapsed');
+    window.toggleRefModal = (open) => document.getElementById('refModal').classList.toggle('open', open);
+
+    window.setSurfaceMode = (mode) => {
+      for (const id of ['modeSat', 'modeMap', 'modeTopo', 'modeAI']) {
+        document.getElementById(id).classList.remove('active');
+      }
+      if (mode === 'sat') { terrainMesh.material.map = satTex; document.getElementById('modeSat').classList.add('active'); }
+      else if (mode === 'milmap') { terrainMesh.material.map = milMapTex; document.getElementById('modeMap').classList.add('active'); }
+      else if (mode === 'topo') { terrainMesh.material.map = topoTex; document.getElementById('modeTopo').classList.add('active'); }
+      else if (mode === 'ai') { terrainMesh.material.map = aiTex; document.getElementById('modeAI').classList.add('active'); }
+      terrainMesh.material.needsUpdate = true;
+    };
+
+    window.setExaggeration = (val) => {
+      currentExag = parseFloat(val);
+      document.getElementById('exagVal').textContent = currentExag.toFixed(1) + '×';
+      updateTerrainVertices();
+      rebuildOverlays();
+    };
+
+    window.setWaterGlow = (val) => {
+      waterScale = parseFloat(val);
+      document.getElementById('waterVal').textContent = waterScale.toFixed(1) + '×';
+      rebuildOverlays();
+    };
+
+    window.focusSarvatraBridge = () => {
+      const p = bridgeGroup.position;
+      camera.position.set(p.x + 26, p.y + 18, p.z + 28);
+      controls.target.set(p.x + 2, p.y + 2, p.z + 3);
+      controls.update();
+    };
+
+    window.toggleBridgeDeploy = () => {
+      bridgeTarget = bridgeDeployProgress > 0.5 ? 0.0 : 1.0;
+      bridgeAnimating = true;
+      document.getElementById('btnBridgeAnim').textContent = bridgeTarget > 0.5 ? '▶ Deploying Bridge...' : '◀ Stowing Bridge...';
+      setTimeout(() => {
+        document.getElementById('btnBridgeAnim').textContent = bridgeTarget > 0.5 ? '◀ Stow Bridge on Tatra' : '▶ Launch Bridge Span';
+      }, 1300);
+    };
+
+    window.toggleMeshVani = () => {
+      showMeshVani = !showMeshVani;
+      meshVaniGroup.visible = showMeshVani;
+      document.getElementById('btnMesh').classList.toggle('active', showMeshVani);
+    };
+
+    window.toggleLabels = () => {
+      showLabels = !showLabels;
+      document.getElementById('btnLabels').classList.toggle('active', showLabels);
+    };
+
+    window.toggleAcrylicAndTable = () => {
+      showEnclosure = !showEnclosure;
+      enclosureGroup.visible = showEnclosure;
+      document.getElementById('btnBox').classList.toggle('active', showEnclosure);
+    };
+
+    window.setCameraPreset = (preset) => {
+      if (preset === 'overview') {
+        camera.position.set(0, 185, 225);
+        controls.target.set(0, 8, 5);
+      } else if (preset === 'top') {
+        camera.position.set(0, 295, 0.1);
+        controls.target.set(0, 5, 0);
+      }
+      controls.update();
+    };
+
+    window.exportTerrainSTL = () => {
+      const exporter = new STLExporter();
+      const exportGroup = new THREE.Group();
+      exportGroup.add(terrainMesh.clone());
+      const bin = exporter.parse(exportGroup, { binary: true });
+      const blob = new Blob([bin], { type: 'application/octet-stream' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Bathinda_Sector_8x7ft_WaterBodies_Terrain_Model.stl';
+      a.click();
+    };
+
+    init();
+  </script>
+</body>
+</html>
